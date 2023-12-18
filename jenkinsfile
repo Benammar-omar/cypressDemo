@@ -22,10 +22,15 @@ pipeline {
         }
         stage('Publish Reports') {
     steps {
-        // Créer un nouveau répertoire pour les rapports
-        bat 'mkdir cypress-reports'
+        // Vérifier si le répertoire existe avant de le créer
+        script {
+            def dirExists = fileExists('cypress-reports')
+            if (!dirExists) {
+                bat 'mkdir cypress-reports'
+            }
+        }
 
-        // Copier les rapports Cypress depuis le répertoire de génération vers le nouveau répertoire
+        // Copier les rapports Cypress dans un répertoire différent
         bat 'xcopy /E /I cypress\\reports .\\cypress-reports\\cypress-generated-reports'
 
         // Publier les rapports en tant que rapport Jenkins
@@ -39,5 +44,6 @@ pipeline {
         ])
     }
 }
+
     }
 }
