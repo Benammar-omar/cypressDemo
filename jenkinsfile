@@ -20,5 +20,21 @@ pipeline {
                 bat 'npx cypress run'
             }
         }
+        stage('Publish Reports') {
+    steps {
+        // Copier les rapports Cypress dans un répertoire spécifique
+        bat 'xcopy /E /I cypress\\reports .\\cypress-reports'
+
+        // Publier les rapports en tant que rapport Jenkins
+        publishHTML(target: [
+            allowMissing: false,
+            alwaysLinkToLastBuild: false,
+            keepAll: true,
+            reportDir: 'cypress-reports',
+            reportFiles: 'index.html',
+            reportName: 'Cypress Test Report'
+        ])
+    }
+}
     }
 }
