@@ -31,7 +31,7 @@ pipeline {
         }
 
         // Copier les rapports Cypress dans un répertoire différent
-        bat 'xcopy /E /I cypress\\reports .\\cypress-reports\\cypress-generated-reports'
+        bat 'xcopy /E /I /Y cypress\\reports .\\cypress-reports\\cypress-generated-reports'
 
         // Publier les rapports en tant que rapport Jenkins
         publishHTML(target: [
