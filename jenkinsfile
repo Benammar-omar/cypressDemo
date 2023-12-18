@@ -10,7 +10,8 @@ pipeline {
 
         stage('Install Cypress') {
             steps {
-                bat 'npm install cypress'
+                 bat 'npm install cypress' // Installation de Cypress via npm
+                 bat 'npx cypress install' // Installation du binaire Cypress
             }
         }
 
