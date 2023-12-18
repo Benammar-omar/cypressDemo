@@ -1,0 +1,23 @@
+pipeline {
+    agent any
+
+    stages {
+        stage('Checkout') {
+            steps {
+                git 'https://github.com/Benammar-omar/cypressDemo.git'
+            }
+        }
+
+        stage('Install Cypress') {
+            steps {
+                bat 'npm install cypress'
+            }
+        }
+
+        stage('Run Tests') {
+            steps {
+                bat 'npx cypress run'
+            }
+        }
+    }
+}
