@@ -20,9 +20,12 @@ pipeline {
                 bat 'npx cypress run'
             }
         }
-        stage('Publish Reports') {
+       stage('Publish Reports') {
     steps {
-        // Copier les rapports Cypress dans un répertoire spécifique
+        // Créer un nouveau répertoire pour les rapports
+        bat 'mkdir cypress-reports'
+
+        // Copier les rapports Cypress dans le répertoire nouvellement créé
         bat 'xcopy /E /I cypress\\reports .\\cypress-reports'
 
         // Publier les rapports en tant que rapport Jenkins
