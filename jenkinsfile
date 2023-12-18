@@ -26,7 +26,7 @@ pipeline {
         bat 'mkdir cypress-reports'
 
         // Copier les rapports Cypress dans le répertoire nouvellement créé
-        bat 'xcopy /E /I cypress\\reports .\\cypress-reports'
+        bat 'xcopy /E /I cypress-reports .\\cypress-reports'
 
         // Publier les rapports en tant que rapport Jenkins
         publishHTML(target: [
