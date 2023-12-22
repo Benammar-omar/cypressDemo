@@ -4,14 +4,14 @@ pipeline {
     stages {
         stage('Checkout') {
             steps {
-                 git branch: 'main', url: 'https://github.com/Benammar-omar/cypressDemo.git'
+                git branch: 'main', url: 'https://github.com/Benammar-omar/cypressDemo.git'
             }
         }
 
         stage('Install Cypress') {
             steps {
-                 bat 'npm install cypress' // Installation de Cypress via npm
-                 bat 'npx cypress install' // Installation du binaire Cypress
+                bat 'npm install cypress' // Installation de Cypress via npm
+                bat 'npx cypress install' // Installation du binaire Cypress
             }
         }
 
@@ -20,30 +20,53 @@ pipeline {
                 bat 'npx cypress run'
             }
         }
-        stage('Publish Reports') {
-    steps {
-        // Vérifier si le répertoire existe avant de le créer
-        script {
-            def dirExists = fileExists('cypress-reports')
-            if (!dirExists) {
-                bat 'mkdir cypress-reports'
+
+        stage('Publish Cypress Reports') {
+            steps {
+                script {
+                    // Vérifier si le répertoire existe avant de le créer
+                    def dirExists = fileExists('cypress-reports')
+                    if (!dirExists) {
+                        bat 'mkdir cypress-reports'
+                    }
+                }
+
+                // Copier les rapports Cypress dans un répertoire différent
+                bat 'xcopy /E /I /Y cypress\\reports .\\cypress-reports\\cypress-generated-reports'
+
+                // Analyser les fichiers de résultats Cypress
+                def resultFiles = findFiles(glob: '**/cypress-reports/cypress-generated-reports/*.json')
+
+                if (!resultFiles.isEmpty()) {
+                    def htmlContent = "<html><body><h1>Rapport de tests Cypress</h1><ul>"
+
+                    for (file in resultFiles) {
+                        def content = readFile(file)
+                        def json = readJSON(text: content)
+
+                        // Exemple : Afficher le nombre total de tests
+                        htmlContent += "<li>Nombre total de tests : ${json.stats.tests}</li>"
+
+                        // Ajouter d'autres informations pertinentes pour affichage
+                        // ...
+
+                        // Exemple : Afficher les détails des résultats des tests individuels
+                        for (result in json.results) {
+                            htmlContent += "<li>Résultat du test : ${result.title}, État : ${result.state}</li>"
+                            // Ajouter d'autres détails à afficher
+                            // ...
+                        }
+                    }
+
+                    htmlContent += "</ul></body></html>"
+
+                    // Afficher le rapport HTML dans Jenkins
+                    writeFile file: 'cypress-results.html', text: htmlContent
+                    publishHTML(target: [reportDir: '.', reportFiles: 'cypress-results.html', reportName: 'Rapport Cypress'])
+                } else {
+                    echo 'Aucun fichier de résultats Cypress trouvé.'
+                }
             }
         }
-
-        // Copier les rapports Cypress dans un répertoire différent
-        bat 'xcopy /E /I /Y cypress\\reports .\\cypress-reports\\cypress-generated-reports'
-
-        // Publier les rapports en tant que rapport Jenkins
-        publishHTML(target: [
-            allowMissing: false,
-            alwaysLinkToLastBuild: false,
-            keepAll: true,
-            reportDir: 'cypress-reports/cypress-generated-reports',
-            reportFiles: 'index.html',
-            reportName: 'Cypress Test Report'
-        ])
-    }
-}
-
     }
 }
