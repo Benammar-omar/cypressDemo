@@ -34,10 +34,10 @@ pipeline {
                     bat 'xcopy /E /I /Y cypress\\reports .\\cypress-reports\\cypress-generated-reports'
 
                     // Récupérer les fichiers JSON avec une commande shell
-                    def result = bat script: 'dir /b /s cypress-reports\\cypress-generated-reports\\*.json', returnStdout: true
+                    def filesResult = bat script: 'dir /b /s cypress-reports\\cypress-generated-reports\\*.json', returnStdout: true
 
-                    if (result) {
-                        def files = result.split("\\r?\\n")
+                    if (filesResult) {
+                        def files = filesResult.split("\\r?\\n")
 
                         def htmlContent = "<html><body><h1>Rapport de tests Cypress</h1><ul>"
 
@@ -52,8 +52,8 @@ pipeline {
                             // ...
 
                             // Exemple : Afficher les détails des résultats des tests individuels
-                            for (result in json.results) {
-                                htmlContent += "<li>Résultat du test : ${result.title}, État : ${result.state}</li>"
+                            for (testResult in json.results) {
+                                htmlContent += "<li>Résultat du test : ${testResult.title}, État : ${testResult.state}</li>"
                                 // Ajouter d'autres détails à afficher
                                 // ...
                             }
