@@ -34,10 +34,9 @@ pipeline {
                     bat 'xcopy /E /I /Y cypress\\reports .\\cypress-reports\\cypress-generated-reports'
 
                     // Récupérer les fichiers JSON
-                    def resultFiles = bat returnStdout: true, script: 'dir /b /s cypress-reports\\cypress-generated-reports\\*.json'
-                    resultFiles = resultFiles.trim().readLines()
+                    def resultFiles = findFiles(glob: '**/cypress-reports/cypress-generated-reports/*.json')
 
-                    if (!resultFiles.empty) {
+                    if (!resultFiles.isEmpty()) {
                         def htmlContent = "<html><body><h1>Rapport de tests Cypress</h1><ul>"
 
                         for (file in resultFiles) {
