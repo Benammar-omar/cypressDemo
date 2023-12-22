@@ -29,42 +29,41 @@ pipeline {
                     if (!dirExists) {
                         bat 'mkdir cypress-reports'
                     }
-                }
+                    
+                    // Copier les rapports Cypress dans un répertoire différent
+                    bat 'xcopy /E /I /Y cypress\\reports .\\cypress-reports\\cypress-generated-reports'
 
-                // Copier les rapports Cypress dans un répertoire différent
-                bat 'xcopy /E /I /Y cypress\\reports .\\cypress-reports\\cypress-generated-reports'
+                    // Analyser les fichiers de résultats Cypress
+                    def resultFiles = bat(returnStdout: true, script: 'dir /b /s cypress-reports\\cypress-generated-reports\\*.json').trim()
+                    if (resultFiles) {
+                        def htmlContent = "<html><body><h1>Rapport de tests Cypress</h1><ul>"
 
-                // Analyser les fichiers de résultats Cypress
-                def resultFiles = findFiles(glob: '**/cypress-reports/cypress-generated-reports/*.json')
+                        for (file in resultFiles.readLines()) {
+                            def content = readFile(file)
+                            def json = readJSON(text: content)
 
-                if (!resultFiles.isEmpty()) {
-                    def htmlContent = "<html><body><h1>Rapport de tests Cypress</h1><ul>"
+                            // Exemple : Afficher le nombre total de tests
+                            htmlContent += "<li>Nombre total de tests : ${json.stats.tests}</li>"
 
-                    for (file in resultFiles) {
-                        def content = readFile(file)
-                        def json = readJSON(text: content)
-
-                        // Exemple : Afficher le nombre total de tests
-                        htmlContent += "<li>Nombre total de tests : ${json.stats.tests}</li>"
-
-                        // Ajouter d'autres informations pertinentes pour affichage
-                        // ...
-
-                        // Exemple : Afficher les détails des résultats des tests individuels
-                        for (result in json.results) {
-                            htmlContent += "<li>Résultat du test : ${result.title}, État : ${result.state}</li>"
-                            // Ajouter d'autres détails à afficher
+                            // Ajouter d'autres informations pertinentes pour affichage
                             // ...
+
+                            // Exemple : Afficher les détails des résultats des tests individuels
+                            for (result in json.results) {
+                                htmlContent += "<li>Résultat du test : ${result.title}, État : ${result.state}</li>"
+                                // Ajouter d'autres détails à afficher
+                                // ...
+                            }
                         }
+
+                        htmlContent += "</ul></body></html>"
+
+                        // Afficher le rapport HTML dans Jenkins
+                        writeFile file: 'cypress-results.html', text: htmlContent
+                        publishHTML(target: [reportDir: '.', reportFiles: 'cypress-results.html', reportName: 'Rapport Cypress'])
+                    } else {
+                        echo 'Aucun fichier de résultats Cypress trouvé.'
                     }
-
-                    htmlContent += "</ul></body></html>"
-
-                    // Afficher le rapport HTML dans Jenkins
-                    writeFile file: 'cypress-results.html', text: htmlContent
-                    publishHTML(target: [reportDir: '.', reportFiles: 'cypress-results.html', reportName: 'Rapport Cypress'])
-                } else {
-                    echo 'Aucun fichier de résultats Cypress trouvé.'
                 }
             }
         }
