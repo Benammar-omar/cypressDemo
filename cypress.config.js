@@ -19,8 +19,8 @@ module.exports = defineConfig({
     reporter: "cypress-mochawesome-reporter",
     reporterOptions: {
       overwrite: false,
-      html: false,
-      json: true
+      html: true,
+      json: false
     }
   }
 });
