@@ -33,12 +33,14 @@ pipeline {
                     // Copier les rapports Cypress dans un répertoire différent
                     bat 'xcopy /E /I /Y cypress\\reports .\\cypress-reports\\cypress-generated-reports'
 
-                    // Analyser les fichiers de résultats Cypress
-                    def resultFiles = bat(returnStdout: true, script: 'dir /b /s cypress-reports\\cypress-generated-reports\\*.json').trim()
-                    if (resultFiles) {
+                    // Récupérer les fichiers JSON
+                    def resultFiles = bat returnStdout: true, script: 'dir /b /s cypress-reports\\cypress-generated-reports\\*.json'
+                    resultFiles = resultFiles.trim().readLines()
+
+                    if (!resultFiles.empty) {
                         def htmlContent = "<html><body><h1>Rapport de tests Cypress</h1><ul>"
 
-                        for (file in resultFiles.readLines()) {
+                        for (file in resultFiles) {
                             def content = readFile(file)
                             def json = readJSON(text: content)
 
